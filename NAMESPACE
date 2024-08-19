@@ -1,6 +1,6 @@
 exportPattern("^[[:alpha:]]+")
 
-export(StandardiseGeneNames)
+export(StandardizeGeneNames)
 importFrom(RExtra, duplicated)
 importFrom(RExtra, mapvalues)
 importFrom(RExtra, "%!in%")

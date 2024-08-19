@@ -13,12 +13,12 @@ if (interactive()) {
   df <- vroom(URL, row_names = F)
 
   # Create alternate symbol, dash replaced w/ dot
-  df$Alt <- str_replace_all(df$`Marker Symbol`, "-", "\\.")
+  df$alt <- str_replace_all(df$`Marker Symbol`, "-", "\\.")
 
   # Subset relevant rows & columns
   INCL = c("Pseudogene", "Gene")
   df <- df[df$`Marker Type` %in% INCL, c(1,7,12,13)]
-  names(df) <- c("MGI", "Symbol", "Synonym", "Alt")
+  names(df) <- c("MGI", "symbol", "synonym", "alt")
 
   # Loop over rows, split synonyms into multiple rows
   data<- NULL
@@ -30,18 +30,18 @@ if (interactive()) {
     }
 
     # If the alt-symbol occurs in the symbol column, add to the symonym column
-    if (df$Alt[i] %!in% df$Symbol) {
-      df$Synonym[i] <- df$Synonym[i] + "|" + df$Alt[i]
+    if (df$alt[i] %!in% df$symbol) {
+      df$synonym[i] <- df$synonym[i] + "|" + df$alt[i]
     }
 
     # If no synonyms, record row in tmp
     # If there are synonyms, record a row for each synonym
-    if (length(grep("\\|", df$Synonym[i])) == 0) {
+    if (length(grep("\\|", df$synonym[i])) == 0) {
       tmp <- rbind(tmp, df[i, 1:3])
     } else {
-      synonyms <- unique(unlist(str_split(df$Synonym[i], "\\|")))
+      synonyms <- unique(unlist(str_split(df$synonym[i], "\\|")))
       for (synonym in synonyms[synonyms != "NA"]) {
-        tmp <- rbind(tmp, unlist(c(df[i, 1:2], "Synonym" = synonym)))
+        tmp <- rbind(tmp, unlist(c(df[i, 1:2], "synonym" = synonym)))
       }
     }
     # Record tmp to output dataframe after N entries
@@ -57,16 +57,21 @@ if (interactive()) {
     }
   }
 
+  # Remove symbols without synonyms
+  data = data[!is.na(data$synonym),]
+
+  # Remove rows where synonym and symbol are equal
+  data = data[data$symbol != data$synonym,]
+
   # Get non-unique synonyms
-  # These synonyms occur in multiple Symbols
-  non_unique <- data[!is.na(data$Synonym) & duplicated(data$Synonym),]$Synonym
+  # These are synonyms that occur for multiple different symbols
+  non_unique = data[duplicated(data$synonym),]$synonym
 
   # Create and save list with symbol->synonyms
   mmu <- list(
-    unique = data[data$Synonym %!in% non_unique,],
-    non_unique = data[data$Synonym %in% non_unique, ],
-    all_symbols = unique(data$Symbol)
+    unique = data[data$synonym %!in% non_unique,],
+    non_unique = data[data$synonym %in% non_unique, ],
+    all_symbols = unique(data$symbol)
   )
   save(mmu, file = here("./data/mmu.rda"), compress = T, compression_level = 9)
-
 }

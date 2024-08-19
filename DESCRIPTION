@@ -1,8 +1,8 @@
 Package: GeneNames
 Title: GeneNames
 Type: Package
-Version: 0.1.0
-Date: 2024-04-04
+Version: 0.1.1
+Date: 2024-08-19
 Author: Jari Berkhout
 Maintainer: Jari Berkhout <73251322+jberkh@users.noreply.github.com>
 Description: Convert gene names
